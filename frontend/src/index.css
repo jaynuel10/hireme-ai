@@ -1,0 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: "DM Sans", sans-serif;
+    background-color: #f7f6f2;
+    color: #0a0a0f;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: "Syne", sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center gap-2 font-body text-sm font-medium px-5 py-2.5 rounded-full border-none cursor-pointer transition-all duration-200 no-underline whitespace-nowrap;
+  }
+  .btn-primary {
+    @apply bg-ink text-white hover:bg-ink-muted hover:-translate-y-px;
+  }
+  .btn-accent {
+    @apply bg-accent text-white hover:bg-accent-soft hover:-translate-y-px hover:shadow-lg;
+  }
+  .btn-outline {
+    @apply bg-transparent text-ink border border-ink/20 hover:bg-surface-2;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-ink-muted hover:text-ink hover:bg-surface-2;
+  }
+  .btn-lg {
+    @apply px-8 py-3.5 text-base;
+  }
+  .btn-sm {
+    @apply px-4 py-1.5 text-xs;
+  }
+  .tag {
+    @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-surface-2 text-ink-muted;
+  }
+  .tag-teal {
+    @apply bg-teal-pale text-teal;
+  }
+  .tag-accent {
+    @apply bg-accent-pale text-accent;
+  }
+  .tag-gold {
+    @apply bg-gold-pale text-gold;
+  }
+  .card {
+    @apply bg-white rounded-xl border border-black/10 shadow-sm;
+  }
+  .ai-bubble {
+    @apply bg-ink text-white rounded-2xl rounded-bl-sm px-4 py-3.5 text-sm leading-relaxed max-w-xl relative;
+  }
+  .user-bubble {
+    @apply bg-surface-2 rounded-2xl rounded-br-sm px-4 py-3 text-sm self-end max-w-lg;
+  }
+  .section-label {
+    @apply flex items-center gap-2 font-display text-xs font-bold uppercase tracking-widest text-ink-muted mb-4;
+  }
+}
