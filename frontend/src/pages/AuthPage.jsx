@@ -5,25 +5,25 @@ export default function AuthPage({ onAuth, onBack }) {
   const [role, setRole] = useState("candidate");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
+    setLoading(true);
 
     if (mode === "signup") {
       if (form.password.length < 6) {
         setError("Password must be at least 6 characters.");
+        setLoading(false);
         return;
       }
       const registered = JSON.parse(
         localStorage.getItem("hm_registered") || "[]",
       );
-      if (
-        registered.find(
-          (u) => u.email.toLowerCase() === form.email.toLowerCase(),
-        )
-      ) {
+      if (registered.find((u) => u.email === form.email)) {
         setError("Email already registered. Please sign in.");
+        setLoading(false);
         return;
       }
       const newUser = {
@@ -35,6 +35,7 @@ export default function AuthPage({ onAuth, onBack }) {
       };
       registered.push(newUser);
       localStorage.setItem("hm_registered", JSON.stringify(registered));
+      setLoading(false);
       onAuth(newUser);
     } else {
       const registered = JSON.parse(
@@ -47,8 +48,10 @@ export default function AuthPage({ onAuth, onBack }) {
       );
       if (!found) {
         setError("Invalid email or password.");
+        setLoading(false);
         return;
       }
+      setLoading(false);
       onAuth(found);
     }
   };
@@ -145,9 +148,24 @@ export default function AuthPage({ onAuth, onBack }) {
             </div>
             <button
               type="submit"
-              className="btn btn-accent btn-lg w-full justify-center mt-1"
+              disabled={loading}
+              className="btn btn-accent btn-lg w-full justify-center mt-1 disabled:opacity-60"
             >
-              {mode === "signup" ? "Create Account" : "Sign In"}
+              {loading ? (
+                <span className="flex gap-1 items-center">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"
+                      style={{ animationDelay: `${i * 0.2}s` }}
+                    />
+                  ))}
+                </span>
+              ) : mode === "signup" ? (
+                "Create Account"
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
 

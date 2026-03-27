@@ -108,28 +108,34 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## 🔑 Demo Login (Mandatory for Evaluation)
+
+| Role          | Email                    | Password       |
+| ------------- | ------------------------ | -------------- |
+| **Candidate** | `hire-me@anshumat.org`   | `HireMe@2025!` |
+| **Recruiter** | `recruiter@anshumat.org` | `HireMe@2025!` |
+
+These credentials work out of the box — no account creation needed.
+
+---
+
 ## 👤 How to Use
 
 ### As a Candidate
 
-1. Click **Get Started**
-2. Click **"Create account"** at the bottom of the sign in form
-3. Fill in your name, email, password and select **Candidate**
-4. Click **Create Account** — you go straight to the AI Profile Builder
-5. Chat with Aria through 6 steps: Introduction, Experience, Skills, Projects, Education, Summary
-6. Review your AI-generated profile and download as PDF
+1. Click **Get Started** → **Sign In**
+2. Use demo credentials or click **Create account** to register
+3. You land on the **AI Profile Builder**
+4. Chat with Aria through 6 steps: Introduction, Experience, Skills, Projects, Education, Summary
+5. Review your AI-generated profile and download as PDF
 
 ### As a Recruiter
 
-1. Click **Get Started**
-2. Click **"Create account"** and select **Recruiter**
-3. Click **Create Account** — you go to the Recruiter Dashboard
+1. Click **Get Started** → **Sign In**
+2. Use recruiter demo credentials or create a recruiter account
+3. You land on the **Recruiter Dashboard**
 4. Browse 60 candidates, search by skill or role, shortlist candidates
-5. Click **View →** on any candidate to see their full profile
-
-### Signing back in
-
-After logging out, click **Get Started** — the page opens on **Sign In** by default. Enter your email and password to log back in.
+5. Click **View →** on any candidate to see their full profile and skill match
 
 ---
 
@@ -139,12 +145,11 @@ After logging out, click **Get Started** — the page opens on **Sign In** by de
 hireme-ai/
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx                    # Root router and state
+│   │   ├── App.jsx                    # Root router, state and auth
 │   │   ├── index.css                  # Tailwind + design system
 │   │   ├── main.jsx                   # React entry point
 │   │   └── pages/
 │   │       ├── LandingPage.jsx        # Marketing homepage
-│   │       ├── AuthPage.jsx           # Sign up / Sign in
 │   │       ├── AIProfileBuilder.jsx   # 🌟 Core AI chat profile builder
 │   │       ├── ProfilePreview.jsx     # Profile review + PDF export
 │   │       ├── RecruiterDashboard.jsx # Candidate pool (60 candidates)
@@ -173,7 +178,7 @@ The AI Profile Builder is the core of the product. It uses **Groq's LLaMA 3.3 70
 
 1. **👋 Introduction** — Role, experience level, career goals
 2. **💼 Experience** — Work history extracted from natural description
-3. **🛠️ Skills** — AI detects skills from context + suggests missing ones
+3. **🛠️ Skills** — AI detects skills from context and suggests missing ones
 4. **🚀 Projects** — Project details structured automatically
 5. **🎓 Education** — Quick academic background capture
 6. **✨ Summary** — AI writes a compelling 3-sentence professional summary
@@ -203,10 +208,9 @@ Aria: "Got it! I'm picking up: React, real-time systems, fintech domain,
 
 ## 🔐 Security Notes
 
-- Passwords hashed with bcrypt (cost factor 10) for real users
-- JWT tokens expire in 7 days
 - Groq API key stored server-side only — never exposed to browser
-- CORS configured to accept all origins for demo purposes
+- CORS configured to accept requests from all origins for demo purposes
+- JWT tokens expire in 7 days
 
 ---
 
