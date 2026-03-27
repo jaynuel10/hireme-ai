@@ -92,7 +92,7 @@ const CANDIDATES = [
   {
     id: 9,
     name: "Marcus Silva",
-    title: "Machine Learning Engineer",
+    title: "ML Engineer",
     exp: "5 yrs",
     match: 90,
     skills: ["Python", "TensorFlow", "PyTorch"],
@@ -477,7 +477,7 @@ const CANDIDATES = [
   {
     id: 44,
     name: "Lucia Fernández",
-    title: "QA Automation Engineer",
+    title: "QA Automation",
     exp: "4 yrs",
     match: 77,
     skills: ["Selenium", "TestNG", "Java"],
@@ -705,28 +705,30 @@ export default function RecruiterDashboard({
 
   return (
     <div className="min-h-screen bg-surface font-body">
-      <nav className="flex items-center justify-between px-10 py-4 border-b border-black/10 bg-white sticky top-0 z-50">
-        <span className="font-display text-xl font-extrabold tracking-tight">
+      <nav className="flex items-center justify-between px-4 md:px-10 py-4 border-b border-black/10 bg-white sticky top-0 z-50">
+        <span className="font-display text-lg md:text-xl font-extrabold tracking-tight">
           Hire<span className="text-accent">Me</span>.ai
         </span>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-ink-muted">Recruiter Dashboard</span>
+        <div className="flex items-center gap-2 md:gap-3">
+          <span className="text-xs md:text-sm text-ink-muted hidden md:block">
+            Recruiter Dashboard
+          </span>
           <button className="btn btn-outline btn-sm" onClick={onHome}>
             🏠 Home
           </button>
           <button className="btn btn-ghost btn-sm" onClick={onLogout}>
             Log out
           </button>
-          <div className="w-9 h-9 rounded-full bg-ink text-white flex items-center justify-center font-display font-bold text-sm">
+          <div className="w-8 h-8 rounded-full bg-ink text-white flex items-center justify-center font-display font-bold text-sm">
             {(user?.name || "R").charAt(0)}
           </div>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-10 py-8">
-        <div className="flex items-start justify-between mb-5">
+      <div className="max-w-4xl mx-auto px-4 md:px-10 py-6 md:py-8">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-5">
           <div>
-            <h2 className="font-display text-2xl font-extrabold mb-0.5">
+            <h2 className="font-display text-xl md:text-2xl font-extrabold mb-0.5">
               Candidate Pool
             </h2>
             <p className="text-sm text-ink-muted">
@@ -739,17 +741,17 @@ export default function RecruiterDashboard({
             placeholder="Search by name, role, or skill..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-black/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent w-72 transition-colors"
+            className="border border-black/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent w-full md:w-72 transition-colors"
           />
         </div>
 
-        {/* Filter tabs */}
-        <div className="flex gap-2 mb-5 flex-wrap">
+        {/* Filter tabs - scrollable on mobile */}
+        <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
           {["all", "new", "reviewed", "shortlisted"].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm border transition-all ${
+              className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm border transition-all whitespace-nowrap flex-shrink-0 ${
                 filter === f
                   ? "bg-ink text-white border-ink"
                   : "border-black/20 text-ink-muted hover:bg-surface-2"
@@ -774,16 +776,16 @@ export default function RecruiterDashboard({
           {filtered.map((c) => (
             <div
               key={c.id}
-              className="card flex gap-4 items-center px-5 py-4 hover:shadow-md transition-shadow"
+              className="card flex gap-3 md:gap-4 items-start md:items-center px-4 md:px-5 py-4 hover:shadow-md transition-shadow"
             >
-              <div className="w-11 h-11 rounded-full bg-surface-3 text-ink flex items-center justify-center font-display font-bold text-base flex-shrink-0">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-surface-3 text-ink flex items-center justify-center font-display font-bold text-sm flex-shrink-0">
                 {c.name.charAt(0)}
               </div>
               <div
                 className="flex-1 min-w-0 cursor-pointer"
                 onClick={() => onViewCandidate(c)}
               >
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <strong className="text-sm">{c.name}</strong>
                   <span className={`tag ${STATUS_CLS[c.status] || ""}`}>
                     {c.status}
@@ -792,23 +794,24 @@ export default function RecruiterDashboard({
                 <div className="flex items-center gap-1.5 text-xs text-ink-muted mb-2 flex-wrap">
                   <span>{c.title}</span>
                   <span className="opacity-40">·</span>
-                  <span>{c.exp} exp</span>
+                  <span>{c.exp}</span>
                   <span className="opacity-40">·</span>
                   <span>📍 {c.location}</span>
-                  <span className="opacity-40">·</span>
-                  <span>🕐 {c.available}</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {c.skills.map((s) => (
+                  {c.skills.slice(0, 3).map((s) => (
                     <span key={s} className="tag">
                       {s}
                     </span>
                   ))}
+                  {c.skills.length > 3 && (
+                    <span className="tag">+{c.skills.length - 3}</span>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 <div className="text-center">
-                  <span className="block font-display text-xl font-extrabold text-teal leading-none">
+                  <span className="block font-display text-lg md:text-xl font-extrabold text-teal leading-none">
                     {c.match}%
                   </span>
                   <span className="text-xs text-ink-muted uppercase tracking-wide">
@@ -817,12 +820,12 @@ export default function RecruiterDashboard({
                 </div>
                 <button
                   onClick={() => toggleShortlist(c.id)}
-                  className={`btn btn-sm ${shortlisted.has(c.id) ? "btn-accent" : "btn-outline"}`}
+                  className={`btn btn-sm text-xs ${shortlisted.has(c.id) ? "btn-accent" : "btn-outline"}`}
                 >
-                  {shortlisted.has(c.id) ? "✓ Shortlisted" : "+ Shortlist"}
+                  {shortlisted.has(c.id) ? "✓" : "+"}
                 </button>
                 <button
-                  className="btn btn-outline btn-sm"
+                  className="btn btn-outline btn-sm text-xs"
                   onClick={() => onViewCandidate(c)}
                 >
                   View →
