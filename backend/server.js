@@ -6,7 +6,28 @@ const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
-app.use(cors());
+
+// Handle CORS preflight for ALL routes
+app.options("*", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.status(200).end();
+});
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || "hireme-secret-key-change-in-prod";
@@ -17,7 +38,8 @@ let users = [
     id: "demo-1",
     name: "Demo Candidate",
     email: "hire-me@anshumat.org",
-    password: bcrypt.hashSync("HireMe@2026!", 10),
+    password: "HireMe2025",
+    plainPassword: true,
     role: "candidate",
     createdAt: new Date().toISOString(),
   },
@@ -25,7 +47,8 @@ let users = [
     id: "demo-2",
     name: "Demo Recruiter",
     email: "recruiter@anshumat.org",
-    password: bcrypt.hashSync("HireMe@2026!", 10),
+    password: "HireMe2025",
+    plainPassword: true,
     role: "recruiter",
     createdAt: new Date().toISOString(),
   },
@@ -119,9 +142,27 @@ app.post("/api/auth/signup", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
+  console.log(
+    "🔐 Login attempt:",
+    email,
+    "| password length:",
+    password?.length,
+  );
   const user = users.find((u) => u.email === email);
-  if (!user || !(await bcrypt.compare(password, user.password)))
-    return res.status(401).json({ error: "Invalid credentials" });
+  console.log("👤 User found:", !!user);
+  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+  // Demo users use plain text password, real users use bcrypt
+  let match = false;
+  if (user.plainPassword) {
+    match = password === user.password;
+    console.log("🔑 Plain password match:", match);
+  } else {
+    match = await bcrypt.compare(password, user.password);
+    console.log("🔑 Bcrypt password match:", match);
+  }
+
+  if (!match) return res.status(401).json({ error: "Invalid credentials" });
 
   const token = jwt.sign(
     { id: user.id, email: user.email, role: user.role },
@@ -286,6 +327,19 @@ app.post("/api/ai/chat", async (req, res) => {
     console.error("❌ AI proxy error:", err.message);
     res.status(500).json({ error: err.message || "Failed to reach Groq API" });
   }
+});
+
+// ─── Debug Route (remove before final submission) ────────────────────────────
+app.get("/api/debug/demo", async (req, res) => {
+  const user = users.find((u) => u.email === "hire-me@anshumat.org");
+  if (!user) return res.json({ found: false });
+  const match = await bcrypt.compare("HireMe@2025!", user.password);
+  res.json({
+    found: true,
+    passwordMatch: match,
+    role: user.role,
+    name: user.name,
+  });
 });
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

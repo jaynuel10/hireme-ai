@@ -1,56 +1,56 @@
 import { useState } from "react";
 
-const API_BASE = "";
-
 export default function AuthPage({ onAuth, onBack }) {
-  const [mode, setMode] = useState("signup");
+  const [mode, setMode] = useState("login");
   const [role, setRole] = useState("candidate");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
-    try {
-      const endpoint =
-        mode === "signup" ? "/api/auth/signup" : "/api/auth/login";
-      const body =
-        mode === "signup"
-          ? {
-              name: form.name,
-              email: form.email,
-              password: form.password,
-              role,
-            }
-          : { email: form.email, password: form.password };
-
-      const response = await fetch(`${API_BASE}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
-        setLoading(false);
+    if (mode === "signup") {
+      if (form.password.length < 6) {
+        setError("Password must be at least 6 characters.");
         return;
       }
-
-      // Save token to localStorage for future requests
-      localStorage.setItem("token", data.token);
-      onAuth({ ...data.user });
-    } catch (err) {
-      setError(
-        "Cannot connect to server. Make sure your backend is running on port 5000 and CORS is enabled.",
+      const registered = JSON.parse(
+        localStorage.getItem("hm_registered") || "[]",
       );
+      if (
+        registered.find(
+          (u) => u.email.toLowerCase() === form.email.toLowerCase(),
+        )
+      ) {
+        setError("Email already registered. Please sign in.");
+        return;
+      }
+      const newUser = {
+        id: `user-${Date.now()}`,
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role,
+      };
+      registered.push(newUser);
+      localStorage.setItem("hm_registered", JSON.stringify(registered));
+      onAuth(newUser);
+    } else {
+      const registered = JSON.parse(
+        localStorage.getItem("hm_registered") || "[]",
+      );
+      const found = registered.find(
+        (u) =>
+          u.email.toLowerCase().trim() === form.email.toLowerCase().trim() &&
+          u.password === form.password,
+      );
+      if (!found) {
+        setError("Invalid email or password.");
+        return;
+      }
+      onAuth(found);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -65,7 +65,7 @@ export default function AuthPage({ onAuth, onBack }) {
       </nav>
 
       <div className="flex justify-center items-center px-5 py-16">
-        <div className="card w-full max-w-md p-9 animate-fade-up">
+        <div className="card w-full max-w-md p-9">
           <div className="text-center mb-7">
             <h2 className="font-display text-2xl font-extrabold mb-1.5">
               {mode === "signup" ? "Create your account" : "Welcome back"}
@@ -77,14 +77,13 @@ export default function AuthPage({ onAuth, onBack }) {
             </p>
           </div>
 
-          {/* Role tabs — only show on signup */}
           {mode === "signup" && (
             <div className="flex gap-2 bg-surface-2 p-1 rounded-full mb-6">
               {["candidate", "recruiter"].map((r) => (
                 <button
                   key={r}
                   onClick={() => setRole(r)}
-                  className={`flex-1 py-2 rounded-full text-sm font-medium transition-all duration-150 ${
+                  className={`flex-1 py-2 rounded-full text-sm font-medium transition-all ${
                     role === r
                       ? "bg-white text-ink shadow-sm"
                       : "text-ink-muted"
@@ -96,7 +95,6 @@ export default function AuthPage({ onAuth, onBack }) {
             </div>
           )}
 
-          {/* Error message */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl px-4 py-3 mb-4">
               ⚠️ {error}
@@ -111,8 +109,8 @@ export default function AuthPage({ onAuth, onBack }) {
                 </label>
                 <input
                   type="text"
-                  placeholder="Ada Lovelace"
                   required
+                  placeholder="Ada Lovelace"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full border border-black/10 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
@@ -125,8 +123,8 @@ export default function AuthPage({ onAuth, onBack }) {
               </label>
               <input
                 type="email"
-                placeholder="you@example.com"
                 required
+                placeholder="you@example.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="w-full border border-black/10 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
@@ -138,34 +136,18 @@ export default function AuthPage({ onAuth, onBack }) {
               </label>
               <input
                 type="password"
-                placeholder="••••••••"
                 required
-                minLength={6}
+                placeholder="••••••••"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="w-full border border-black/10 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
               />
             </div>
             <button
-              className="btn btn-accent btn-lg w-full justify-center mt-1 disabled:opacity-60"
               type="submit"
-              disabled={loading}
+              className="btn btn-accent btn-lg w-full justify-center mt-1"
             >
-              {loading ? (
-                <span className="flex gap-1 items-center">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"
-                      style={{ animationDelay: `${i * 0.2}s` }}
-                    />
-                  ))}
-                </span>
-              ) : mode === "signup" ? (
-                "Create Account"
-              ) : (
-                "Sign In"
-              )}
+              {mode === "signup" ? "Create Account" : "Sign In"}
             </button>
           </form>
 
@@ -181,11 +163,6 @@ export default function AuthPage({ onAuth, onBack }) {
               {mode === "signup" ? "Sign in" : "Create account"}
             </button>
           </p>
-
-          <div className="mt-5 bg-surface-2 rounded-lg px-4 py-3 text-xs text-ink-muted text-center">
-            <span className="font-semibold text-ink">🔑 Demo:</span>{" "}
-            hire-me@anshumat.org / HireMe@2026!
-          </div>
         </div>
       </div>
     </div>

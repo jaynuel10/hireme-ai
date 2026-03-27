@@ -1,7 +1,6 @@
 import { useState } from "react";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
-import OnboardingPage from "./pages/OnboardingPage";
 import AIProfileBuilder from "./pages/AIProfileBuilder";
 import ProfilePreview from "./pages/ProfilePreview";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
@@ -15,52 +14,42 @@ export default function App() {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [history, setHistory] = useState(["landing"]);
 
-  // Navigate to a new page, pushing to history stack
   const navigate = (p, data = {}) => {
     setPage(p);
     setHistory((prev) => [...prev, p]);
     if (data.candidate) setSelectedCandidate(data.candidate);
   };
 
-  // Go back one page
   const goBack = () => {
     if (history.length <= 1) return;
     const newHistory = history.slice(0, -1);
-    const prevPage = newHistory[newHistory.length - 1];
     setHistory(newHistory);
-    setPage(prevPage);
+    setPage(newHistory[newHistory.length - 1]);
   };
 
   const handleAuth = (userData) => {
-    setUser(userData);
-    localStorage.setItem("hm_user", JSON.stringify(userData));
-
-    // Load saved profile for candidates
-    const savedProfile = localStorage.getItem(`hm_profile_${userData.id}`);
-    if (savedProfile) {
-      setProfileData(JSON.parse(savedProfile));
-    }
-
-    // Route strictly by role — no exceptions
-    if (userData.role === "recruiter") {
-      navigate("recruiter-dashboard");
+    const u = { ...userData, role: userData.role || "candidate" };
+    setUser(u);
+    localStorage.setItem("hm_user", JSON.stringify(u));
+    const saved = localStorage.getItem(`hm_profile_${u.id}`);
+    if (saved) setProfileData(JSON.parse(saved));
+    if (u.role === "recruiter") {
+      setPage("recruiter-dashboard");
     } else {
-      navigate("ai-builder");
+      setPage("ai-builder");
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("hm_user");
-    localStorage.removeItem("token");
     setUser(null);
     setProfileData({});
-    setHistory(["landing"]);
     setPage("landing");
+    setHistory(["landing"]);
   };
 
   const handleSetProfileData = (data) => {
     setProfileData(data);
-    // Save per-user so different accounts don't share profiles
     if (user?.id) {
       localStorage.setItem(`hm_profile_${user.id}`, JSON.stringify(data));
     }
@@ -69,10 +58,7 @@ export default function App() {
   return (
     <div className="app">
       {page === "landing" && (
-        <LandingPage
-          onGetStarted={() => navigate("auth")}
-          user={null} // Never show logged-in state on landing — user must log in each session
-        />
+        <LandingPage onGetStarted={() => navigate("auth")} />
       )}
       {page === "auth" && <AuthPage onAuth={handleAuth} onBack={goBack} />}
       {page === "ai-builder" && (
@@ -92,7 +78,6 @@ export default function App() {
           onLogout={handleLogout}
           onBack={goBack}
           onSubmit={() => {
-            alert("✅ Profile submitted successfully!");
             navigate("landing");
           }}
         />
@@ -101,8 +86,8 @@ export default function App() {
         <RecruiterDashboard
           user={user}
           onHome={() => {
-            setHistory(["landing"]);
             setPage("landing");
+            setHistory(["landing"]);
           }}
           onLogout={handleLogout}
           onViewCandidate={(c) =>

@@ -95,7 +95,7 @@ IMPORTANT RULES:
 - Once they approve, congratulate them and tell them their profile is ready`,
 };
 
-const API_BASE = "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 async function callAI(system, messages) {
   const response = await fetch(`${API_BASE}/api/ai/chat`, {
